@@ -1,0 +1,14 @@
+Analysis of Variance Table
+
+Response: even
+                            Df  Sum Sq  Mean Sq F value    Pr(>F)    
+Treatment                    1 0.00004 0.000041  0.0043  0.947959    
+Tissue                       2 0.43117 0.215585 22.6752 4.874e-09 ***
+P.variety                    1 0.01751 0.017506  1.8413  0.177436    
+Treatment:Tissue             2 0.01098 0.005492  0.5777  0.562807    
+Treatment:P.variety          1 0.01838 0.018384  1.9337  0.167021    
+Tissue:P.variety             2 0.00067 0.000334  0.0351  0.965485    
+Treatment:Tissue:P.variety   2 0.10145 0.050723  5.3351  0.006074 ** 
+Residuals                  116 1.10287 0.009508                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

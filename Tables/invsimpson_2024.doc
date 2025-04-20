@@ -1,0 +1,14 @@
+Analysis of Variance Table
+
+Response: invsimpson
+                            Df  Sum Sq Mean Sq F value    Pr(>F)    
+Treatment                    1    5.05    5.05  0.2043  0.652098    
+Tissue                       2 2039.90 1019.95 41.2566 2.929e-14 ***
+P.variety                    1   82.61   82.61  3.3416  0.070119 .  
+Treatment:Tissue             2   17.85    8.92  0.3610  0.697777    
+Treatment:P.variety          1   70.24   70.24  2.8413  0.094560 .  
+Tissue:P.variety             2   32.63   16.31  0.6599  0.518854    
+Treatment:Tissue:P.variety   2  253.64  126.82  5.1297  0.007333 ** 
+Residuals                  116 2867.77   24.72                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
