@@ -1,0 +1,11 @@
+Permutation test for adonis under reduced model
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = bray_dist ~ Treatment, data = as(sample_data(ps_tissue), "data.frame"), permutations = 999)
+         Df SumOfSqs      R2      F Pr(>F)    
+Model     1   0.7495 0.09823 3.7037  0.001 ***
+Residual 34   6.8801 0.90177                  
+Total    35   7.6296 1.00000                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
