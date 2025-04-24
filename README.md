@@ -7,8 +7,8 @@ Author: Bibek Dabargainya
 
 Date: Feb. 9, 2024
 
-Please read and understand all the following steps
-## Bioinformatic pipeline for peanut ITS amplicon sequencing 
+**Please read and understand all the following steps**
+
 
 Welcome to the fungal ITS amplicon sequencing pipeline — a comprehensive workflow designed to explore how fungal
 communities shift, survive, and interact with peanut plants across environmental stress conditions. This pipeline 
@@ -35,7 +35,7 @@ sequencing on ASAX. This was published on February 9, 2024 and was designed to s
 analysis. Our modifications extend and specialize this pipeline for mid season drought studies in peanut agro-ecosystems.
 
 
-[**Flourishing Fungi** pipeline by Zachary Noel (2024); (https://zenodo.org/doi/10.5281/zenodo.10655178)**](https://zenodo.org/doi/10.5281/zenodo.10655178)
+[**Flourishing Fungi** pipeline by Zachary Noel (2024); https://zenodo.org/doi/10.5281/zenodo.10655178](https://zenodo.org/doi/10.5281/zenodo.10655178)
 
 Bellow is the summary for this pipeline:
 
@@ -63,7 +63,7 @@ Bellow is the summary for this pipeline:
    - No ambiguous bases (Ns): 0
    - Truncate reads to 264 bp
    - Optionally trim the first 44 bp from each read
-   Filtered reads are then saved as both FASTA and FASTQ files in the 'filtered/' directory.
+   - Filtered reads are then saved as both FASTA and FASTQ files in the 'filtered/' directory.
 
 5. Dereplication and OTU Clustering
    Filtered reads are dereplicated using vsearch. Then usearch clusters sequences into
@@ -97,10 +97,10 @@ PERMANOVA, and DESeq2-based differential abundance testing. This R analysis begi
 creating a phyloseq object. Before beginning, ensure that you have the following files
 downloaded and in an appropriate directory so that R can utilize them:
 
----[OTU_TABLE_CSV_FUNGI.csv](Phyloseq_input/OTU_TABLE_CSV_FUNGI.csv)
----[In_use_constax_taxonomy.csv](Phyloseq_input/In_use_constax_taxonomy.csv)
----[FungalMetadata_2024.csv](Phyloseq_input/FungalMetadata_2024.csv)
----[otus.fasta](Phyloseq_input/otus.fasta)
+      - [OTU_TABLE_CSV_FUNGI.csv](Phyloseq_input/OTU_TABLE_CSV_FUNGI.csv)
+      - [In_use_constax_taxonomy.csv](Phyloseq_input/In_use_constax_taxonomy.csv)
+      - [FungalMetadata_2024.csv](Phyloseq_input/FungalMetadata_2024.csv)
+      - [otus.fasta](Phyloseq_input/otus.fasta)
 
 
   ## Load Dependencies
@@ -189,10 +189,10 @@ Following is th quick view table for the reults.
 |--------------------------|------------------------------------------------------------------|--------------------------------------------------------------|----------------------------------------------------|
 | **Alpha Diversity**       | ANOVA tables by year for Shannon, Simpson, Richness, Evenness   | [`Tables/Alpha_diversity/`](Tables/Alpha_diversity/)         | [`Plots/Alpha_diversity/`](Plots/Alpha_diversity/) |
 | **Global PERMANOVA**      | Bray-Curtis PERMANOVA on Treatment × Tissue × Variety           | [`Tables/Global_permanova/`](Tables/Global_permanova/)       | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
-| **PERMANOVA (by Tissue)** | Tissue-level PERMANOVA tests by year                           | [`Tables/Permanova/`](Tables/Permanova/)                     | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
+| **PERMANOVA (by Tissue)** | Tissue-level PERMANOVA tests by year                            | [`Tables/Permanova/`](Tables/Permanova/)                     | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
 | **Beta Dispersion**       | Betadispersion test for homogeneity of dispersions              | [`Tables/Beta_dispersion/`](Tables/Beta_dispersion/)         | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
 | **ANOSIM**                | Analysis of similarity for treatment separation                 | [`Tables/Anosim/`](Tables/Anosim/)                           | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
-| **Differential Abundance**| DESeq2 differential analysis for Peg tissue by year             | *Not available (plot only)*                                 | [`Plots/Differential_abundance/`](Plots/Differential_abundance/) |
+| **Differential Abundance**| DESeq2 differential analysis for Peg tissue by year             | *Not available (plot only)*                                  | [`Plots/Differential_abundance/`](Plots/Differential_abundance/) |
 
 > **Note:** PCoA plots shown in the "Plot Link" column are available only for Peg tissue subsets by year, as Peg was identified
 as the most significantly responsive tissue across years explaning the variation in fungal community compistion between our treatment.
@@ -229,21 +229,21 @@ bzd0052@auburn.edu
 ├──📁 Plots
 │   ├──📁 Alpha_diversity                         # Boxplots and combined figures for alpha diversity
 │   │   ├──🖼️ Eveness_final.png
-│   │   ├──🖼 Final_combined_alpha_diversity_plot1.png
-│   │   ├──🖼 Invsimpson_final.png
-│   │   ├──🖼 Richness_final.png
-│   │   └──🖼 shannon_final.png
+│   │   ├──🖼️ Final_combined_alpha_diversity_plot1.png
+│   │   ├──🖼️ Invsimpson_final.png
+│   │   ├──🖼️ Richness_final.png
+│   │   └──🖼️ shannon_final.png
 │   ├──📁 Beta_diversity_PCoA                     # Ordination plots by year and tissue
-│   │   ├──🖼 PCoA_Peg_AllYears.png
-│   │   ├──🖼 PCoA_Root_AllYears.png
-│   │   └──🖼 PCoA_Soil_AllYears.png
-│   ├──🖼 Decontaminated_plot.png                 # Contaminant filtering summary plot
+│   │   ├──🖼️ PCoA_Peg_AllYears.png
+│   │   ├──🖼️ PCoA_Root_AllYears.png
+│   │   └──🖼️ PCoA_Soil_AllYears.png
+│   ├──🖼️ Decontaminated_plot.png                 # Contaminant filtering summary plot
 │   ├──📁 Differential_abundance                  # Volcano plots for peg tissue by year
-│   │   ├──🖼 Diff_abundance_2022_peg2.png
-│   │   ├──🖼 Diff_abundance_2023_peg.png
+│   │   ├──🖼️ Diff_abundance_2022_peg2.png
+│   │   ├──🖼️ Diff_abundance_2023_peg.png
 │   │   └──🖼️ Diff_abundance_2024_peg.png
-│   ├──🖼 fungi.rareplot.png                      # Rarefaction curve
-│   └──🖼 read.depths.plot.png                    # Histogram of read depths
+│   ├──🖼️ fungi.rareplot.png                      # Rarefaction curve
+│   └──🖼️ read.depths.plot.png                    # Histogram of read depths
 ├──📝 README.md                                # Project description notes
 └──📁 Tables                                      # Statistical test outputs
     ├──📁 Alpha_diversity                         # ANOVA result tables for alpha diversity metrics
