@@ -4,6 +4,7 @@
 [![DOI](https://zenodo.org/badge/924459211.svg)](https://doi.org/10.5281/zenodo.15278087)
 
 Author: Bibek Dabargainya
+
 Date: Feb. 9, 2024
 
 Please read and understand all the following steps
@@ -34,7 +35,7 @@ sequencing on ASAX. This was published on February 9, 2024 and was designed to s
 analysis. Our modifications extend and specialize this pipeline for mid season drought studies in peanut agro-ecosystems.
 
 
-[**Flourishing Fungi** pipeline by Zachary Noel (2024); https://zenodo.org/doi/10.5281/zenodo.10655178](https://zenodo.org/doi/10.5281/zenodo.10655178)
+[**Flourishing Fungi** pipeline by Zachary Noel (2024); (https://zenodo.org/doi/10.5281/zenodo.10655178)**](https://zenodo.org/doi/10.5281/zenodo.10655178)
 
 Bellow is the summary for this pipeline:
 
@@ -82,7 +83,7 @@ Bellow is the summary for this pipeline:
    threshold of 0.8. The output is saved in the taxonomy_assignments/ directory and includes
    tabular CSV files suitable for downstream use in R. 
    
-   -- Note: This step is not yet publicly available in the original Flourishing Fungi pipeline
+   > **Note:** This step is not yet publicly available in the original Flourishing Fungi pipeline
    by Dr. Zachary Noel, but is included here with permission. It is based on internal, unpublished
    code developed by Dr. Noel for CONSTAX2 integration on ASAX. This functionality may be included
    in future public releases of the original pipeline.
@@ -210,42 +211,42 @@ bzd0052@auburn.edu
 
 ```
 ├──📁 HPC_script
-│   ├──📄 Flourishing_fingi_pipeline.sh
-│   ├──📄 replace_fastaheaders2.py
-│   └──📄 samples.txt
-├──📄 Peanut_fungal_microbiome.Rproj
-├──🌐 Peanut_Fungi_Final.html
-├──📝 Peanut_Fungi_Final.md
-├──📘 Peanut_Fungi_Final.Rmd
+│   ├──📄 Flourishing_fingi_pipeline.sh         # Bash pipeline script for ITS amplicon reads
+│   ├──📄 replace_fastaheaders2.py              # Python script for renaming FASTA headers 
+│   └──📄 samples.txt                           # Sample ID list used in loops
+├──📄 Peanut_fungal_microbiome.Rproj            # RStudio project file
+├──🌐 Peanut_Fungi_Final.html                   # Final HTML output
+├──📝 Peanut_Fungi_Final.md                     # GitHub Markdown version of analysis
+├──📘 Peanut_Fungi_Final.Rmd                    # Main RMarkdown file
 ├──📁 Phyloseq_input
-│   ├──📊 FungalMetadata_2024.csv
-│   ├──💾 Fungi-phyloseq-clean-CSS.rds
-│   ├──💾 Fungi-phyloseq-clean.rds
-│   ├──💾 Fungi-phyloseq.rds
-│   ├──📊 In_use_constax_taxonomy.csv
-│   ├──🧬 otus.fasta
-│   └──📊 OTU_TABLE_CSV_FUNGI.csv
+│   ├──📊 FungalMetadata_2024.csv               # Metadata table (CSV format)
+│   ├──💾 Fungi-phyloseq-clean-CSS.rds          # RDS object after CSS normalization
+│   ├──💾 Fungi-phyloseq-clean.rds              # Filtered phyloseq object
+│   ├──💾 Fungi-phyloseq.rds                    # Initial raw phyloseq object
+│   ├──📊 In_use_constax_taxonomy.csv           # OTU taxonomy assignments
+│   ├──🧬 otus.fasta                            # FASTA file of representative sequences
+│   └──📊 OTU_TABLE_CSV_FUNGI.csv               # OTU abundance table
 ├──📁 Plots
-│   ├──📁 Alpha_diversity
+│   ├──📁 Alpha_diversity                         # Boxplots and combined figures for alpha diversity
 │   │   ├──🖼️ Eveness_final.png
 │   │   ├──🖼 Final_combined_alpha_diversity_plot1.png
 │   │   ├──🖼 Invsimpson_final.png
 │   │   ├──🖼 Richness_final.png
 │   │   └──🖼 shannon_final.png
-│   ├──📁 Beta_diversity_PCoA
+│   ├──📁 Beta_diversity_PCoA                     # Ordination plots by year and tissue
 │   │   ├──🖼 PCoA_Peg_AllYears.png
 │   │   ├──🖼 PCoA_Root_AllYears.png
 │   │   └──🖼 PCoA_Soil_AllYears.png
-│   ├──🖼 Decontaminated_plot.png
-│   ├──📁 Differential_abundance
+│   ├──🖼 Decontaminated_plot.png                 # Contaminant filtering summary plot
+│   ├──📁 Differential_abundance                  # Volcano plots for peg tissue by year
 │   │   ├──🖼 Diff_abundance_2022_peg2.png
 │   │   ├──🖼 Diff_abundance_2023_peg.png
 │   │   └──🖼️ Diff_abundance_2024_peg.png
-│   ├──🖼 fungi.rareplot.png
-│   └──🖼 read.depths.plot.png
-├──📝 README.md
-└──📁 Tables
-    ├──📁 Alpha_diversity
+│   ├──🖼 fungi.rareplot.png                      # Rarefaction curve
+│   └──🖼 read.depths.plot.png                    # Histogram of read depths
+├──📝 README.md                                # Project description notes
+└──📁 Tables                                      # Statistical test outputs
+    ├──📁 Alpha_diversity                         # ANOVA result tables for alpha diversity metrics
     │   ├──📄 even_2022.doc
     │   ├──📄 even_2023.doc
     │   ├──📄 even_2024.doc
@@ -258,7 +259,7 @@ bzd0052@auburn.edu
     │   ├──📄 shannon_2022.doc
     │   ├──📄 shannon_2023.doc
     │   └──📄 shannon_2024.doc
-    ├──📁 Anosim
+    ├──📁 Anosim                              # ANOSIM result tables
     │   ├──📄 ANOSIM_2022_Peg.doc
     │   ├──📄 ANOSIM_2022_Root.doc
     │   ├──📄 ANOSIM_2022_Soil.doc
@@ -268,7 +269,7 @@ bzd0052@auburn.edu
     │   ├──📄 ANOSIM_2024_Peg.doc
     │   ├──📄 ANOSIM_2024_Root.doc
     │   └──📄 ANOSIM_2024_Soil.doc
-    ├──📁 Beta_dispersion
+    ├──📁 Beta_dispersion                       # Betadispersion results
     │   ├──📄 BetaDispersion_2022_Peg.doc
     │   ├──📄 BetaDispersion_2022_Root.doc
     │   ├──📄 BetaDispersion_2022_Soil.doc
@@ -278,11 +279,11 @@ bzd0052@auburn.edu
     │   ├──📄 BetaDispersion_2024_Peg.doc
     │   ├──📄 BetaDispersion_2024_Root.doc
     │   └──📄 BetaDispersion_2024_Soil.doc
-    ├──📁 Global_permanova
+    ├──📁 Global_permanova                      # Global PERMANOVA by year
     │   ├──📄 Permanova_2022.doc
     │   ├──📄 Permanova_2023.doc
     │   └──📄 Permanova_2024.doc
-    └──📁 Permanova
+    └──📁 Permanova                             # Tissue-level PERMANOVA tests
         ├──📄 Permanova_2022_Peg.doc
         ├──📄 Permanova_2022_Root.doc
         ├──📄 Permanova_2022_Soil.doc
