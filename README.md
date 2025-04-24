@@ -1,6 +1,14 @@
 
 # Peanut Fungal ITS Amplicon Sequencing
 
+[![DOI](https://zenodo.org/badge/924459211.svg)](https://doi.org/10.5281/zenodo.15278087)
+
+Author: Bibek Dabargainya
+Date: Feb. 9, 2024
+
+Please read and understand all the following steps
+## Bioinformatic pipeline for peanut ITS amplicon sequencing 
+
 Welcome to the fungal ITS amplicon sequencing pipeline — a comprehensive workflow designed to explore how fungal
 communities shift, survive, and interact with peanut plants across environmental stress conditions. This pipeline 
 was developed to process high-throughput ITS sequence data from plant-associated environments using the ASAX High
@@ -26,7 +34,7 @@ sequencing on ASAX. This was published on February 9, 2024 and was designed to s
 analysis. Our modifications extend and specialize this pipeline for mid season drought studies in peanut agro-ecosystems.
 
 
-[**Flourishing Fungi** pipeline by Zachary Noel (2024)](https://zenodo.org/doi/10.5281/zenodo.10655178)
+[**Flourishing Fungi** pipeline by Zachary Noel (2024); https://zenodo.org/doi/10.5281/zenodo.10655178](https://zenodo.org/doi/10.5281/zenodo.10655178)
 
 Bellow is the summary for this pipeline:
 
@@ -219,22 +227,22 @@ bzd0052@auburn.edu
 │   └──📊 OTU_TABLE_CSV_FUNGI.csv
 ├──📁 Plots
 │   ├──📁 Alpha_diversity
-│   │   ├── 	🖼️ Eveness_final.png
-│   │   ├── Final_combined_alpha_diversity_plot1.png
-│   │   ├── Invsimpson_final.png
-│   │   ├── Richness_final.png
-│   │   └── shannon_final.png
+│   │   ├──🖼️ Eveness_final.png
+│   │   ├──🖼 Final_combined_alpha_diversity_plot1.png
+│   │   ├──🖼 Invsimpson_final.png
+│   │   ├──🖼 Richness_final.png
+│   │   └──🖼 shannon_final.png
 │   ├──📁 Beta_diversity_PCoA
-│   │   ├── PCoA_Peg_AllYears.png
-│   │   ├── PCoA_Root_AllYears.png
-│   │   └── PCoA_Soil_AllYears.png
-│   ├── Decontaminated_plot.png
+│   │   ├──🖼 PCoA_Peg_AllYears.png
+│   │   ├──🖼 PCoA_Root_AllYears.png
+│   │   └──🖼 PCoA_Soil_AllYears.png
+│   ├──🖼 Decontaminated_plot.png
 │   ├──📁 Differential_abundance
-│   │   ├── Diff_abundance_2022_peg2.png
-│   │   ├── Diff_abundance_2023_peg.png
-│   │   └──️ Diff_abundance_2024_peg.png
-│   ├── fungi.rareplot.png
-│   └── read.depths.plot.png
+│   │   ├──🖼 Diff_abundance_2022_peg2.png
+│   │   ├──🖼 Diff_abundance_2023_peg.png
+│   │   └──🖼️ Diff_abundance_2024_peg.png
+│   ├──🖼 fungi.rareplot.png
+│   └──🖼 read.depths.plot.png
 ├──📝 README.md
 └──📁 Tables
     ├──📁 Alpha_diversity
