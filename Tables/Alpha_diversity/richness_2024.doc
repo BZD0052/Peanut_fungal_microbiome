@@ -11,4 +11,4 @@ Tissue:P.variety             2  14100    7050   3.9380   0.02215 *
 Treatment:Tissue:P.variety   2   2833    1417   0.7913   0.45569    
 Residuals                  116 207676    1790                       
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

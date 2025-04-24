@@ -1,0 +1,704 @@
+---
+title: "Peanut_2022/24_Fungi"
+author: "Bibek Dabargainya, Zachary Noel"
+date: "2025-04-20"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+  md_document:
+    variant: gfm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**R Markdown**
+
+
+## Load Dependencies
+
+```{r echo = T, error=FALSE, warning=FALSE, message=FALSE}
+library(phyloseq)
+library(tidyverse)
+library(vegan)
+library(Biostrings)
+library(ggplot2)
+library(ggpubr)
+library(decontam)
+library(metagenomeSeq)
+library(ggrepel)
+library(microbiome)
+library(dplyr)
+library(DESeq2)
+```
+
+## Colorblind Palette
+```{r echo = TRUE}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#0072B2", "#D55E00", "#CC79A7", "#F0E442")
+ibm.cbb <- c("#648FFF", "#785EF0", "#DC267F", "#FE6100", "#004d4d")
+tol.cbb <- c("#332288", "#117733", "#f95d6a", "#2f4b7c", "#44AA99", "#88CCEE", "#CC6677", "#AA4499", "#882255")
+```
+
+## Load files from HPC to create a phyloseq object
+```{r echo = TRUE}
+# Taxonomy 
+#Edit the taxonomy rds
+nbc.tax.fungi <- read.csv("Phyloseq_input/In_use_constax_taxonomy.csv")
+
+nbc.tax.fungi$Lowest_Taxonomic_Rank <- ifelse(nbc.tax.fungi$Phylum == "unidentified", nbc.tax.fungi$Kingdom,
+                                             ifelse(nbc.tax.fungi$Class == "unidentified", nbc.tax.fungi$Phylum,
+                                                    ifelse(nbc.tax.fungi$Order == "unidentified", nbc.tax.fungi$Class,
+                                                           ifelse(nbc.tax.fungi$Family == "unidentified", nbc.tax.fungi$Order,
+                                                                  ifelse(nbc.tax.fungi$Genus == "unidentified", nbc.tax.fungi$Family,
+                                                                         ifelse(nbc.tax.fungi$Species == "unidentified", nbc.tax.fungi$Genus, 
+                                                                                paste(nbc.tax.fungi$Species)))))))
+
+nbc.tax.fungi$Label <- paste(nbc.tax.fungi$OTU_ID, nbc.tax.fungi$Lowest_Taxonomic_Rank, sep = "_")
+
+#create taxonomy variable
+tax <- nbc.tax.fungi
+head(tax)
+rownames(tax) <- tax$OTU_ID
+TAX.fungi <- phyloseq::tax_table(as.matrix(tax))
+
+# OTU Table 
+table <- read.csv("Phyloseq_input/OTU_TABLE_CSV_FUNGI.csv")
+rownames(table) <- table$OTU_ID
+table <- table[,-1]
+OTU.fungi <- phyloseq::otu_table(table, taxa_are_rows = TRUE)
+
+list(colnames(OTU.fungi))
+
+# Metadata 
+samples <- read.csv("Phyloseq_input/FungalMetadata_2024.csv", na.strings = "na")
+rownames(samples) <- samples$Sample #row names must match OTU table headers
+samples$Sample_Type <- ifelse(samples$Category == "True Sample", "Sample", 
+                              ifelse(samples$Category == "NEC", "NEC",
+                                     ifelse(samples$Category == "PCR_NEC", "NEC",
+                                            ifelse(samples$Category == "PCR1_NC_110123", "NEC", 
+                                                ifelse(samples$Category == "PCR2_NC_110123", "NEC",
+                                                       ifelse(samples$Category == "PCR3_NC_110123", "NEC", "Mock"))))))
+SAMP.fungi <- phyloseq::sample_data(samples)
+view(SAMP.fungi)
+
+
+# Fasta File
+FASTA.fungi <- Biostrings::readDNAStringSet("Phyloseq_input/otus.fasta", format="fasta", seek.first.rec=TRUE, use.names=TRUE)
+
+# Phyloseq Object Creation
+phyloseq.start <- phyloseq(SAMP.fungi, TAX.fungi, OTU.fungi, FASTA.fungi)
+head(rownames(samples))  # Sample names in metadata
+head(colnames(OTU.fungi))  # Sample names in OTU table
+
+
+x <- list(colnames(table))
+y <- list(samples$Sample)
+
+setdiff(x,y)
+
+
+#save phyloseq object as an rds
+saveRDS(phyloseq.start, "Phyloseq_input/Fungi-phyloseq.rds")
+phyloseq.start <- readRDS("Phyloseq_input/Fungi-phyloseq.rds")
+```
+
+## Decontamination 
+```{r echo = TRUE}
+#Use the full dataset to call contaminants, then remove them, if they exist in the non plant OTU dataset
+sample_data(phyloseq.start)$is.neg <- sample_data(phyloseq.start)$Sample_Type == "NEC"
+
+contamdf.prev <- isContaminant(phyloseq.start, method="prevalence", neg="is.neg", threshold = 0.1, normalize = TRUE)
+badTaxa <- rownames(contamdf.prev[contamdf.prev$contaminant == TRUE,])
+
+print(badTaxa)
+goodTaxa <- setdiff(taxa_names(phyloseq.start), badTaxa)
+phyloseq.nobad <- prune_taxa(goodTaxa, phyloseq.start)
+
+# transform data to presence absence
+ps.pa <- transform_sample_counts(phyloseq.start, function(abund) 1*(abund>0))
+
+# making a dataframe for both negative and positive samples.
+ps.pa.neg <- prune_samples(sample_data(ps.pa)$Category == "NEC", ps.pa)
+ps.pa.pos <- prune_samples(sample_data(ps.pa)$Category == "True Sample", ps.pa)
+
+# Make data.frame of prevalence in positive and negative samples
+df.pa <- data.frame(pa.pos=taxa_sums(ps.pa.pos), pa.neg=taxa_sums(ps.pa.neg),
+                    contaminant=contamdf.prev$contaminant)
+
+
+decontaminated <- ggplot(data=df.pa, aes(x=pa.neg, y=pa.pos, color=contaminant)) +
+  geom_point() +
+  xlab("Prevalence (Negative Controls)") + 
+  ylab("Prevalence (True Samples)") + 
+  ggtitle("") +
+  theme_classic() + 
+  scale_color_manual(values = c(cbbPalette[[1]], cbbPalette[[2]]))
+print(decontaminated)
+
+##Save plots
+ggsave("Plots/Decontaminated_plot.png", plot = decontaminated, width = 6, height = 4, dpi = 400)
+```
+
+## Sub-setting to only kingdom fungi.
+```{r echo = T}
+physeq.clean.samples <- phyloseq.nobad %>% 
+  phyloseq::subset_taxa(Kingdom == "Fungi") %>% 
+  subset_samples(Category == "True Sample") %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE)
+```
+
+## Remove samples with less than 5000 reads.
+```{r}
+phyloseq.clean.filt <- physeq.clean.samples %>% 
+  #subset_samples(Sample != "C122DT5") %>% #remove outlier (strange taxa)
+  prune_samples(sample_sums(.) > 5000, .) %>% # remove samples below 5,000 reads
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE) # remove taxa with less than 1 reads
+```
+
+## Save a clean RDS file
+```{r}
+saveRDS(phyloseq.clean.filt, "Phyloseq_input/Fungi-phyloseq-clean.rds")
+phyloseq.clean.filt <- readRDS("Phyloseq_input/Fungi-phyloseq-clean.rds")
+```
+
+## General Statistics
+```{r echo =T}
+sample_sums(phyloseq.clean.filt) %>% ##Calculates the total read count for each sample 
+  sort()   ##Orders the samples by read depth in ascending order.
+
+# New number of total reads #8,085,375
+sum(sample_sums(phyloseq.clean.filt)) #Calculates the total number of reads across all samples in the phyloseq object.= 39,24,376
+
+# Mean and median read depth per samples 
+mean(sample_sums(phyloseq.clean.filt)) # 21618.65
+median(sample_sums(phyloseq.clean.filt)) # 19,128.5
+
+# Histogram including median read depth
+read.depths <- data.frame(sample_sums(phyloseq.clean.filt)) #Converts the read depth information into a data frame (read.depths)
+colnames(read.depths) <- "read.depth"
+read.depth.plot <- ggplot(read.depths, aes(read.depth)) +
+  geom_histogram(binwidth = 5000,fill = cbbPalette[[3]], color = "black") + 
+  geom_vline(xintercept = median(sample_sums(phyloseq.clean.filt)), linetype = "dashed") + 
+  theme_classic() + 
+  xlab("Read Depth")
+read.depth.plot
+
+#save plot
+ggsave("Plots/read.depths.plot.png", plot = read.depth.plot, width = 6, height = 4, dpi = 400)
+```
+
+## Rarefaction
+```{r echo = T}
+#step1:Extracts the sample metadata from phyloseq.clean.filt into a data frame (sam.data) 
+sam.data <- data.frame(phyloseq.clean.filt@sam_data) 
+sam.data$Sample <- sam.data$Sample
+tab <- as(otu_table(phyloseq.clean.filt), "matrix")
+#class(tab) <- "matrix"
+tab <- t(tab) # transpose observations to rows 
+rare <- rarecurve(tab, step=500, lwd=2, ylab="OTU",  label=F, tidy = T) 
+
+
+fungi.rare.curve.extract2 <- left_join(rare, sam.data, by = c("Site" = "Sample")) 
+
+fungi.rare <- ggplot(fungi.rare.curve.extract2, aes(x = Sample, y = Species, group = Site, color = interaction(Treatment, Tissue))) + 
+  geom_point() +
+  scale_color_manual(values = cbbPalette)+
+  geom_line() + 
+  xlab("Reads") + 
+  ylab("Number of OTUs") + 
+  ggtitle("Fungi")+
+  theme_classic() + 
+  geom_vline(xintercept = median(sample_sums(phyloseq.clean.filt)), linetype = "dashed") +
+  ggtitle("") 
+
+fungi.rare
+
+#save plot
+ggsave("Plots/fungi.rareplot.png", plot = fungi.rare, width = 6, height = 4, dpi = 400)
+```
+
+
+## Alpha Diversity
+
+```{r echo = TRUE}
+phyloseq.clean.filt@sam_data$shannon <- estimate_richness(phyloseq.clean.filt, measures=c("Shannon"))$Shannon
+phyloseq.clean.filt@sam_data$invsimpson <- estimate_richness(phyloseq.clean.filt, measures=c("InvSimpson"))$InvSimpson
+phyloseq.clean.filt@sam_data$richness <- estimate_richness(phyloseq.clean.filt, measures=c("Observed"))$Observed
+phyloseq.clean.filt@sam_data$even <- phyloseq.clean.filt@sam_data$shannon/log(phyloseq.clean.filt@sam_data$richness)
+
+sample.data.fungi <- data.frame(phyloseq.clean.filt@sam_data)
+```
+
+
+```{r echo = TRUE}
+# Define the years 
+years <- c("2022", "2023", "2024")
+
+# Define the diversity metrics
+diversity_metrics <- c("shannon", "invsimpson", "richness", "even") 
+
+# Create an empty list to store ANOVA results
+anova_results <- list()
+
+# Loop through diversity metrics and years to run ANOVA
+for (metric in diversity_metrics) {
+  for (yr in years) {
+  data_subset <- subset(sample.data.fungi, Year == yr)   #Subset the data by year
+  formula_obj <- as.formula(paste0(metric, " ~ Treatment*Tissue*P.variety")) # Create model formula dynamically
+  model <- lm(formula_obj, data = data_subset)  # Fit the linear model and calculate ANOVA
+  anova_table <- anova(model)
+  result_name <- paste0(metric, "_", yr) # Store result in the list "shannon_2022"
+  anova_results[[result_name]] <- anova_table
+  } 
+} 
+
+#view the anova result
+
+anova_results[["shannon_2022"]]
+anova_results[["shannon_2023"]]
+anova_results[["shannon_2024"]]
+
+anova_results[["invsimpson_2022"]]
+anova_results[["invsimpson_2023"]]
+anova_results[["invsimpson_2024"]]
+
+anova_results[["richness_2022"]]
+anova_results[["richness_2023"]]
+anova_results[["richness_2024"]]
+
+anova_results[["even_2022"]]
+anova_results[["even_2023"]]
+anova_results[["even_2024"]]
+
+# Save the anaova result
+for (i in seq_along(anova_results)) {
+  name <- names(anova_results)[i]
+  capture.output(anova_results[[i]], file = paste0("Tables/Alpha_diversity/",name, ".doc"))
+}
+
+# Create empty list to store plots
+combined_plots <- list()
+
+# Loop through diversity indices to create one combined plot per index (for all years)
+for (metric in diversity_metrics) {
+  combined_plots[[metric]] <- sample.data.fungi %>%
+    ggplot(aes(x = Tissue, y = .data[[metric]], fill = Treatment)) +  # Select metric dynamically
+    geom_boxplot() +
+    theme_classic() +
+    facet_wrap(~Year, scales = "free") +  # Separate panels for each year
+    stat_compare_means(method = "t.test", label = "p.signif", hide.ns = TRUE, size = 3, vjust = 1.2) +
+    stat_compare_means(method = "t.test", aes(label = paste0("p = ", after_stat(p.format))),
+                                             size = 3, vjust = -0.5) +
+    theme(legend.position = "bottom")
+}
+
+#plot
+combined_plots[["shannon"]]
+combined_plots[["invsimpson"]]
+combined_plots[["richness"]]
+combined_plots[["even"]]
+ 
+# Arrange all diversity index plots into a final combined figure
+final_combined_plot <- ggarrange(
+  combined_plots[["shannon"]],
+  combined_plots[["invsimpson"]],
+  combined_plots[["richness"]],
+  combined_plots[["even"]],
+  nrow = 2, ncol = 2,
+  common.legend = TRUE,
+  legend = "bottom"
+)
+
+# Display the final combined plot
+final_combined_plot
+
+#save individual plots
+ggsave("Plots/Alpha_diversity/shannon_final.png", plot = combined_plots[["shannon"]], width = 10, height = 6, dpi = 400)
+ggsave("Plots/Alpha_diversity/Invsimpson_final.png", plot = combined_plots[["invsimpson"]], width = 10, height = 6, dpi = 400)
+ggsave("Plots/Alpha_diversity/Richness_final.png", plot = combined_plots[["richness"]], width = 10, height = 6, dpi = 400)
+ggsave("Plots/Alpha_diversity/Eveness_final.png", plot = combined_plots[["even"]], width = 10, height = 6, dpi = 400)
+
+#save plot
+ggsave("Plots/Alpha_diversity/Final_combined_alpha_diversity_plot1.png", plot = final_combined_plot, width = 18, height = 12, dpi = 400)
+```
+
+## Metagenome CSS normalization
+```{r echo = T}
+MGS <- phyloseq_to_metagenomeSeq(phyloseq.clean.filt)
+p <- metagenomeSeq::cumNormStatFast(MGS)
+
+MGS <- metagenomeSeq::cumNorm(MGS, p =p)
+
+metagenomeSeq::normFactors(MGS) # exports the normalized factors for each sample
+
+norm.fungi <- metagenomeSeq::MRcounts(MGS, norm = T)
+
+norm.fungi.OTU <- phyloseq::otu_table(norm.fungi, taxa_are_rows = TRUE)
+
+fungi.css.norm <- phyloseq::phyloseq(norm.fungi.OTU, TAX.fungi, FASTA.fungi, SAMP.fungi)
+
+
+## Save a clean RDS file
+saveRDS(fungi.css.norm, "Phyloseq_input/Fungi-phyloseq-clean-CSS.rds")
+physeq.css <- readRDS("Phyloseq_input/Fungi-phyloseq-clean-CSS.rds")
+```
+## Permanova
+### Sub setting according to year
+
+```{r echo = TRUE}
+##Year 2022
+fungi.css.norm.2022 <- subset_samples(fungi.css.norm, Year == "2022") %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE)
+
+##Year 2023
+fungi.css.norm.2023 <- subset_samples(fungi.css.norm, Year == "2023") %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE)
+
+##Year 2024
+fungi.css.norm.2024 <- subset_samples(fungi.css.norm, Year == "2024") %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE)
+
+```
+
+### Loop for global permanova
+```{r  echo = TRUE}
+# Define the years
+years <- c("2022", "2023", "2024")
+
+# Loop through each year
+for (yr in years) {
+  
+  # Dynamically get the phyloseq object for that year
+  ps_year <- get(paste0("fungi.css.norm.", yr))
+  
+  # Calculate Bray-Curtis distance matrix
+  bray_dist <- phyloseq::distance(ps_year, method = "bray")
+  
+  # Run PERMANOVA with interaction terms and by = "term"
+  set.seed(1234)
+  permanova_global_result <- adonis2(bray_dist ~ Treatment * Tissue * P.variety,
+                    data = as(sample_data(ps_year), "data.frame"),
+                    by = "term",
+                    permutations = 999) 
+  # Capture the result
+  capture.output(permanova_global_result,
+                 file = paste0("Tables/Global_permanova/Permanova_", yr, ".doc"))
+}
+```
+
+### Loop for beta diversity: pcoa and permanova; betadispersion and anisom 
+```{r  echo = TRUE}
+# Define the years and tissue types (assuming you already have fungi.css.norm.2022, etc.)
+plot_list <- list()
+years <- c("2022", "2023", "2024")
+tissues <- c("Peg", "Root", "Soil")
+
+for (yr in years) {
+  # Get the year-specific phyloseq object (e.g., fungi.css.norm.2022)
+  ps_year <- get(paste0("fungi.css.norm.", yr))
+  
+  for (tissue in tissues) {
+    # Subset by tissue (already subset by year)
+    ps_tissue <- subset_samples(ps_year, Tissue == tissue)
+    
+    # Calculate Bray-Curtis distance
+    bray_dist <- phyloseq::distance(ps_tissue, method = "bray")
+    
+    # PERMANOVA Analysis
+    set.seed(12325)
+    permanova_result <- adonis2(bray_dist ~ Treatment,
+                                data = as(sample_data(ps_tissue), "data.frame"),
+                                permutations = 999)
+    capture.output(permanova_result,
+                  file = paste0("Tables/Permanova/Permanova_", yr, "_", tissue, ".doc"))
+    
+    # Beta Dispersion Analysis
+    dispersion_result <- betadisper(bray_dist, sample_data(ps_tissue)$Treatment)
+    beta_disp_result <- permutest(dispersion_result, permutations = 999)
+   capture.output(beta_disp_result,
+                   file = paste0("Tables/Beta_dispersion/BetaDispersion_", yr, "_", tissue, ".doc"))
+    
+    # ANOSIM Analysis
+    anosim_result <- anosim(bray_dist, sample_data(ps_tissue)$Treatment)
+    capture.output(anosim_result,
+                  file = paste0("Tables/Anosim/ANOSIM_", yr, "_", tissue, ".doc"))
+    
+    # Visualization: Bray-Curtis PCoA Ordination Plot with global aesthetics
+    ordination <- ordinate(ps_tissue, method = "PCoA", distance = "bray")
+    ord_data <- data.frame(ordination$vectors)
+    # Ensure the Tissue variable is available (if it’s constant, this is optional)
+    ord_data$Tissue <- as.factor(sample_data(ps_tissue)$Tissue)
+    ord_data$Treatment <- sample_data(ps_tissue)$Treatment
+    
+    p <- ggplot(ord_data, aes(x = Axis.1, y = Axis.2, fill = Treatment, shape = Tissue)) +
+      geom_point(size = 4, alpha = 0.7) +
+      stat_ellipse(aes(color = Treatment), type = "t", level = 0.95) +
+      ggtitle(paste("Year", yr)) +   #Adds year title
+      scale_shape_manual(name = "Tissue",
+                         values = c("Peg" = 21, "Root" = 22, "Soil" = 23)) +
+      scale_fill_manual(values = cbbPalette, name = "Treatment") +
+      scale_color_manual(values = cbbPalette) +
+      xlab(paste("PCoA1 -", round(100 * ordination$values$Relative_eig[1], 2), "%")) +
+      ylab(paste("PCoA2 -", round(100 * ordination$values$Relative_eig[2], 2), "%")) +
+      guides(fill = guide_legend(override.aes = list(shape = 21)),
+             shape = guide_legend(override.aes = list(fill = "black"))) +
+      theme_bw() +
+      theme(axis.title.x = element_text(face = "bold", size = 9),
+               axis.title.y = element_text(face = "bold", size = ),
+               axis.text.x  = element_text(face = "bold", size = 10),
+               axis.text.y  = element_text(face = "bold", size = 10)) 
+      
+    # Instead of saving the plot, store it in the list with a unique name
+    plot_list[[paste(yr, tissue, sep = "_")]] <- p
+    
+    # Optional: print progress to the console
+    cat("Saved analyses and plot for Year", yr, "and Tissue", tissue, "\n")
+  }
+}
+
+# Initialize a list to store the arranged plots for each tissue type
+combined_by_tissue <- list()
+
+for (tissue in tissues) {
+  # Extract plots for this tissue across all years
+  tissue_plots <- lapply(years, function(yr) {
+    plot_list[[paste(yr, tissue, sep = "_")]]
+  })
+  
+  # Arrange the plots in one row (or adjust nrow/ncol as desired)
+  combined_by_tissue[[tissue]] <- ggarrange(plotlist = tissue_plots,
+                                            ncol = length(years),
+                                            nrow = 1,
+                                            common.legend = TRUE,
+                                            legend = "bottom",
+                                            labels = "auto")
+}
+
+# View each of the combined plots 
+combined_by_tissue[["Peg"]]
+combined_by_tissue[["Root"]]
+combined_by_tissue[["Soil"]]
+
+#save the combined plot
+
+ggsave("Plots/Beta_diversity_PCoA/PCoA_Peg_AllYears.png",
+       plot = combined_by_tissue[["Peg"]],
+       width = 8, height = 6, dpi = 400)
+
+ggsave("Plots/Beta_diversity_PCoA/PCoA_Root_AllYears.png",
+       plot = combined_by_tissue[["Root"]],
+       width = 8, height = 6, dpi = 400)
+
+ggsave("Plots/Beta_diversity_PCoA/PCoA_Soil_AllYears.png",
+       plot = combined_by_tissue[["Soil"]],
+       width = 8, height = 6, dpi = 400)
+```
+## Differential Abundance 
+### Filtering for Differential Abundance 
+```{r  echo = TRUE}
+# Filtering data to only include Peg tissue between Drought and Irrigated treatments, using normalized data
+
+#Year_2022
+diff_peg_2022 <- phyloseq.clean.filt %>%
+  # Filter for "Peg" tissue type and both treatments
+  phyloseq::subset_samples(Year == 2022 & Tissue == "Peg" & Treatment %in% c("Irrigated", "Drought")) %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE)
+
+diff_peg_2023 <- phyloseq.clean.filt %>%
+  # Filter for "Peg" tissue type and both treatments
+  phyloseq::subset_samples(Year == 2023 & Tissue == "Peg" & Treatment %in% c("Irrigated", "Drought")) %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE) 
+
+#Year_2024
+diff_peg_2024 <- phyloseq.clean.filt %>%
+  # Filter for "Peg" tissue type and both treatments
+  phyloseq::subset_samples(Year == 2024 & Tissue == "Peg" & Treatment %in% c("Irrigated", "Drought")) %>%
+  phyloseq::filter_taxa(function(x) sum(x) > 0, TRUE)
+
+```
+
+### Differential Abundance Analysis with DESeq2
+
+#### 2022 Peg Tissue
+```{r  echo = TRUE}
+# Convert the phyloseq object to a DESeq2 object.
+# Here, we use the "Treatment" column in your sample metadata as the design variable.
+dds <- phyloseq_to_deseq2(diff_peg_2022, ~ Treatment)
+
+# Run the DESeq2 analysis using the Wald test and parametric fit.
+dds <- DESeq(dds, test = "Wald", fitType = "parametric")
+
+# Extract the results.
+# Here, cooksCutoff is set to FALSE to disable filtering based on Cook's distance.
+res <- results(dds, cooksCutoff = FALSE)
+
+# Set a significance threshold for the adjusted p-value.
+alpha <- 1
+
+# Filter to keep only significant taxa.
+sigtab <- res[which(res$padj < alpha), ]
+
+# Combine the DESeq2 results with the taxonomy data.
+# This assumes that the row names of the DESeq2 result match the taxa in the phyloseq object.
+sigtab <- cbind(as(sigtab, "data.frame"),
+                as(tax_table(diff_peg_2022)[rownames(sigtab), ], "matrix"))
+
+sigtab
+
+
+# Create the volcano plot object from the sigtab data frame.
+set.seed(1001)
+deseq22_volcano <- ggplot(sigtab, aes(x = log2FoldChange, y = -log10(padj), color = Class)) +
+  # Add data points for each OTU using their log2 fold change and significance
+  geom_point(size = 2, alpha = 1) +
+  # Add non-overlapping labels for significant OTUs (padj <= 0.01) from the 'Label' column
+  geom_text_repel(data = sigtab[sigtab$padj <= 0.01, ],
+                  aes(label = Label), size = 2.5) +
+  theme_classic() +
+  labs(title = "Peg 2022 Differential Abundance with DESeq2",
+       x = "Log2 Fold Change",
+       y = "-Log10 Adjusted P-value") +
+  # Manually set the color scale using custom palettes and name the legend "Class"
+  scale_color_manual(values = c(cbbPalette, ibm.cbb, tol.cbb), name = "Class") +
+  # Manually set the shapes for the points and label the legend as "p ≤ 0.05"
+  scale_shape_manual(values = c(20, 24), name = "p ≤ 0.05") +
+  # Add a vertical dashed line at x = 0 (representing no fold change)
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  # Annotate the plot with text "Irrigated" at the coordinate (1, 7)
+  annotate("text", x = 1, y = 12.5, label = "Irrigated", color = "black", size = 5) +
+  # Annotate the plot with text "Drought" at the coordinate (-2, 7)
+  annotate("text", x = -2, y = 12.5, label = "Drought", color = "black", size = 5)
+
+
+deseq22_volcano
+
+# Save the plot
+ggsave("Plots/Differential_abundance/Diff_abundance_2022_peg2.png",
+       plot = deseq22_volcano,
+             width = 12, height = 8, dpi = 400)
+```
+
+#### 2023 Peg Tissue
+```{r  echo = TRUE}
+# Convert the phyloseq object to a DESeq2 object.
+# Here, we use the "Treatment" column in your sample metadata as the design variable.
+dds <- phyloseq_to_deseq2(diff_peg_2023, ~ Treatment)
+
+# Run the DESeq2 analysis using the Wald test and parametric fit.
+dds <- DESeq(dds, test = "Wald", fitType = "parametric")
+
+# Extract the results.
+# Here, cooksCutoff is set to FALSE to disable filtering based on Cook's distance.
+res <- results(dds, cooksCutoff = FALSE)
+
+# Set a significance threshold for the adjusted p-value.
+alpha <- 1
+
+# Filter to keep only significant taxa.
+sigtab <- res[which(res$padj < alpha), ]
+
+# Combine the DESeq2 results with the taxonomy data.
+# This assumes that the row names of the DESeq2 result match the taxa in the phyloseq object.
+sigtab <- cbind(as(sigtab, "data.frame"),
+                as(tax_table(diff_peg_2023)[rownames(sigtab), ], "matrix"))
+
+sigtab
+
+
+# Create the volcano plot object from the sigtab data frame.
+set.seed(1001)
+
+deseq23_volcano <- ggplot(sigtab, aes(x = log2FoldChange, y = -log10(padj), color = Class)) +
+  # Add data points for each OTU using their log2 fold change and significance
+  geom_point(size = 2, alpha = 1) +
+  # Add non-overlapping labels for significant OTUs (padj <= 0.01) from the 'Label' column
+  geom_text_repel(data = sigtab[sigtab$padj <= 0.01, ],
+                  aes(label = Label), size = 2.5) +
+  theme_classic() +
+  labs(title = "Peg 2023 Differential Abundance with DESeq2",
+       x = "Log2 Fold Change",
+       y = "-Log10 Adjusted P-value") +
+  # Manually set the color scale using custom palettes and name the legend "Class"
+  scale_color_manual(values = c(cbbPalette, ibm.cbb, tol.cbb), name = "Class") +
+  # Manually set the shapes for the points and label the legend as "p ≤ 0.05"
+  scale_shape_manual(values = c(20, 24), name = "p ≤ 0.05") +
+  # Add a vertical dashed line at x = 0 (representing no fold change)
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  # Annotate the plot with text "Irrigated" at the coordinate (1, 7)
+  annotate("text", x = 1, y = 12.5, label = "Irrigated", color = "black", size = 5) +
+  # Annotate the plot with text "Drought" at the coordinate (-2, 7)
+  annotate("text", x = -2, y = 12.5, label = "Drought", color = "black", size = 5)
+
+
+deseq23_volcano
+
+# Save the plot
+ggsave("Plots/Differential_abundance/Diff_abundance_2023_peg.png",
+       plot = deseq23_volcano,
+             width = 12, height = 8, dpi = 400)
+```
+
+#### 2024 Peg Tissue
+```{r  echo = TRUE}
+# Convert the phyloseq object to a DESeq2 object.
+# Here, we use the "Treatment" column in your sample metadata as the design variable.
+dds <- phyloseq_to_deseq2(diff_peg_2024, ~ Treatment)
+
+# Run the DESeq2 analysis using the Wald test and parametric fit.
+dds <- DESeq(dds, test = "Wald", fitType = "parametric")
+
+# Extract the results.
+# Here, cooksCutoff is set to FALSE to disable filtering based on Cook's distance.
+res <- results(dds, cooksCutoff = FALSE)
+
+# Set a significance threshold for the adjusted p-value.
+alpha <- 1
+
+# Filter to keep only significant taxa.
+sigtab <- res[which(res$padj < alpha), ]
+
+# Combine the DESeq2 results with the taxonomy data.
+# This assumes that the row names of the DESeq2 result match the taxa in the phyloseq object.
+sigtab <- cbind(as(sigtab, "data.frame"),
+                as(tax_table(diff_peg_2024)[rownames(sigtab), ], "matrix"))
+
+sigtab
+
+
+# Create the volcano plot object from the sigtab data frame.
+set.seed(1003)
+deseq24_volcano <- ggplot(sigtab, aes(x = log2FoldChange, y = -log10(padj), color = Class)) +
+  # Add data points for each OTU using their log2 fold change and significance
+  geom_point(size = 2, alpha = 1) +
+  # Add non-overlapping labels for significant OTUs (padj <= 0.01) from the 'Label' column
+  geom_text_repel(data = sigtab[sigtab$padj <= 0.01, ],
+                  aes(label = Label), size = 2.5) +
+  theme_classic() +
+  labs(title = "Peg 2024 Differential Abundance with DESeq2",
+       x = "Log2 Fold Change",
+       y = "-Log10 Adjusted P-value") +
+  # Manually set the color scale using custom palettes and name the legend "Class"
+  scale_color_manual(values = c(cbbPalette, ibm.cbb, tol.cbb), name = "Class") +
+  # Manually set the shapes for the points and label the legend as "p ≤ 0.05"
+  scale_shape_manual(values = c(20, 24), name = "p ≤ 0.05") +
+  # Add a vertical dashed line at x = 0 (representing no fold change)
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  # Annotate the plot with text "Irrigated" at the coordinate (1, 7)
+  annotate("text", x = 1, y = 12.5, label = "Irrigated", color = "black", size = 5) +
+  # Annotate the plot with text "Drought" at the coordinate (-2, 7)
+  annotate("text", x = -2, y = 12.5, label = "Drought", color = "black", size = 5)
+
+
+deseq24_volcano
+
+# Save the plot
+ggsave("Plots/Differential_abundance/Diff_abundance_2024_peg.png",
+       plot = deseq24_volcano,
+             width = 12, height = 8, dpi = 400)
+```
+
+
+
+
