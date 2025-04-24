@@ -1,4 +1,4 @@
-cat("
+
 # Peanut Fungal ITS Amplicon Sequencing
 
 Welcome to the fungal ITS amplicon sequencing pipeline — a comprehensive workflow designed to explore how fungal
@@ -84,45 +84,46 @@ Bellow is the summary for this pipeline:
 This R pipeline processes fungal ITS1 amplicon sequencing data from peanut samples
 collected under drought and irrigated conditions across three years. It includes
 steps for creating phyloseq objects, decontamination, diversity analysis, normalization,
-PERMANOVA, and DESeq2-based differential abundance testing.
+PERMANOVA, and DESeq2-based differential abundance testing. This R analysis begins by
+creating a phyloseq object. Before beginning, ensure that you have the following files
+downloaded and in an appropriate directory so that R can utilize them:
 
-## Load Dependencies
+---[OTU_TABLE_CSV_FUNGI.csv](Phyloseq_input/OTU_TABLE_CSV_FUNGI.csv)
+---[In_use_constax_taxonomy.csv](Phyloseq_input/In_use_constax_taxonomy.csv)
+---[FungalMetadata_2024.csv](Phyloseq_input/FungalMetadata_2024.csv)
+---[otus.fasta](Phyloseq_input/otus.fasta)
+
+
+  ## Load Dependencies
   Load required R libraries necessary for microbiome and statistical analysis. This pipeline includes :
   
-  ### Core analysis packages
-   -phyloseq       (v1.48.0)   # Microbiome data import, transformation, and analysis
-   -DESeq2         (v1.44.0)   # Differential abundance testing using negative binomial models
-   -vegan          (v2.6-8)    # Community ecology analysis and PERMANOVA
-   -metagenomeSeq  (v1.46.0)   # CSS normalization and abundance modeling for sparse count data
-   -decontam       (v1.24.0)   # Statistical identification of contaminant
-
-  ### Sequence and DNA handling
-  -Biostrings     (v2.72.1)   # Efficient manipulation of biological sequences
-
-  ### Visualization
-  -ggplot2        (v3.5.2)    # Core plotting package for data visualization
-  -ggpubr         (v0.6.0)    # Publication-ready visualizations built on ggplot2
-  -ggrepel        (v0.9.6)    # Smart label placement in plots
-
-  ### Microbiome utilities
-  -microbiome     (v1.26.0)   # High-level tools for microbiome data exploration
-
-  ### Data handling
-  -tidyverse      (v2.0.0)    # Collection of packages for tidy data science
-  -dplyr          (v1.1.4)    # Data manipulation grammar (part of tidyverse)
-
+  | Package        | Version  | Description                                                  |
+  |----------------|----------|--------------------------------------------------------------|
+  | phyloseq       | 1.48.0   | Microbiome data import, transformation, and analysis         |
+  | DESeq2         | 1.44.0   | Differential abundance testing using negative binomial models|
+  | vegan          | 2.6-8    | Community ecology analysis and PERMANOVA                     |
+  | metagenomeSeq  | 1.46.0   | CSS normalization and abundance modeling for sparse count data|
+  | decontam       | 1.24.0   | Statistical identification of contaminants                   |
+  | Biostrings     | 2.72.1   | Efficient manipulation of biological sequences               |
+  | ggplot2        | 3.5.2    | Core plotting package for data visualization                 |
+  | ggpubr         | 0.6.0    | Publication-ready visualizations built on ggplot2            |
+  | ggrepel        | 0.9.6    | Smart label placement in plots                               |
+  | microbiome     | 1.26.0   | High-level tools for microbiome data exploration             |
+  | tidyverse      | 2.0.0    | Collection of packages for tidy data science                 |
+  | dplyr          | 1.1.4    | Data manipulation grammar (part of tidyverse)                |
+  
   
 
-## Create Phyloseq Object
+  ## Create Phyloseq Object
    Load OTU table, taxonomy file, metadata, and fasta sequences from the pipeline output.
    Integrate all data into a single phyloseq object. Sample names are harmonized across
    OTU and metadata to ensure consistency.
 
-## Decontamination
+  ## Decontamination
    Use 'decontam' to identify and remove potential contaminants based on prevalence in
    negative controls. Contaminants are visualized and removed before further analysis.
 
-## Filtering and Cleaning
+  ## Filtering and Cleaning
    In this step, only the samples labeled as 'True Sample' were retained, which excludes
    controls and blank samples to focus on the actual biological data. We specifically filtered
    for taxa classified under the Kingdom 'Fungi' to narrow the analysis to relevant fungal taxa.
@@ -132,7 +133,7 @@ PERMANOVA, and DESeq2-based differential abundance testing.
    These filtering steps ensure that the data used in the analysis is both relevant and of
    adequate quality.
 
-## Summary Statistics
+  ## Summary Statistics
    After filtering the dataset, we calculated key statistics to assess sequencing depth across
    all retained samples. This included the total number of reads remaining, along with the mean
    and median read depths per sample. To visualize the distribution of sequencing effort,
@@ -140,40 +141,59 @@ PERMANOVA, and DESeq2-based differential abundance testing.
    indicating the median read depth. This step provides a quick overview of data quality before
    diversity and abundance analyses
 
-## Rarefaction
+  ## Rarefaction
    Rarefaction curves were generated to evaluate sequencing depth sufficiency and OTU richness
    across samples. Median read depth was overlaid to visualize typical sampling effort, and
    final plots were grouped by treatment and tissue to highlight differences in richness
    accumulation under each condition.
 
-## Alpha Diversity
+  ## Alpha Diversity
    Diversity indices including Shannon, Inverse Simpson, Observed Richness, and Evenness were
    calculated to assess within-sample fungal diversity. A 3-way ANOVA was performed separately
    by year to evaluate the effects of treatment, tissue type, and plant variety. Results were 
    visualized using faceted boxplots and saved for interpretation.
 
-## CSS Normalization (metagenomeSeq)
+  ## CSS Normalization (metagenomeSeq)
    Read counts were normalized using cumulative sum scaling (CSS) via the metagenomeSeq package
    to correct for library size differences across samples. The resulting normalized phyloseq 
    object was saved for downstream beta diversity and differential abundance analyses.-
    
-## Beta Diversity & PERMANOVA
+  ## Beta Diversity & PERMANOVA
    Bray-Curtis distance matrices were used to visualize community dissimilarities through PCoA.
    Global PERMANOVA tested the effects of Treatment, Tissue, and plant variety interactions, 
    while tissue and year specific PERMANOVA, beta-dispersion, and ANOSIM analyses provided
    fined tuned resolution. All outputs, including ordination plots and statistical results,
    were saved by year and tissue.
 
-## Differential Abundance (DESeq2)
+  ## Differential Abundance (DESeq2)
    For each year (2022–2024), DESeq2 was applied to Peg tissue samples under Drought vs Irrigated
    conditions. Significant OTUs were filtered, annotated with taxonomy and visualized using volcano
    plots colored by fungal class. Final figures were saved for each year to highlight key shifts 
    in community structure. 
 
-All plots are saved in the 'Plots/' directory. Statistical outputs are stored in
-'Tables/' with subfolders for ANOVA, PERMANOVA, ANOSIM, and DESeq2 comparisons.
+# Output Summary
 
-To repeat this pipeline, start with the final filtered phyloseq object:
-  'Phyloseq_input/Fungi-phyloseq-clean.rds'
-and follow each section of the R Markdown or script as modular steps.
-")
+All plots are saved in the [`Plots/`](Plots/) directory. Statistical outputs (e.g., ANOVA tables, PERMANOVA results) are stored in the [`Tables/`](Tables/) directory, organized by analysis type.
+Following is th quick view table for the reults.
+
+| **Analysis Type**         | **Description**                                                 | **Results Table Link**                                      | **Plot Link**                                      |
+|--------------------------|------------------------------------------------------------------|--------------------------------------------------------------|----------------------------------------------------|
+| **Alpha Diversity**       | ANOVA tables by year for Shannon, Simpson, Richness, Evenness   | [`Tables/Alpha_diversity/`](Tables/Alpha_diversity/)         | [`Plots/Alpha_diversity/`](Plots/Alpha_diversity/) |
+| **Global PERMANOVA**      | Bray-Curtis PERMANOVA on Treatment × Tissue × Variety           | [`Tables/Global_permanova/`](Tables/Global_permanova/)       | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
+| **PERMANOVA (by Tissue)** | Tissue-level PERMANOVA tests by year                           | [`Tables/Permanova/`](Tables/Permanova/)                     | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
+| **Beta Dispersion**       | Betadispersion test for homogeneity of dispersions              | [`Tables/Beta_dispersion/`](Tables/Beta_dispersion/)         | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
+| **ANOSIM**                | Analysis of similarity for treatment separation                 | [`Tables/Anosim/`](Tables/Anosim/)                           | [`Plots/Beta_diversity_PCoA/`](Plots/Beta_diversity_PCoA/) |
+| **Differential Abundance**| DESeq2 differential analysis for Peg tissue by year             | *Not available (plot only)*                                 | [`Plots/Differential_abundance/`](Plots/Differential_abundance/) |
+
+> **Note:** PCoA plots shown in the "Plot Link" column are available only for Peg tissue subsets by year, as Peg was identified
+as the most significantly responsive tissue across years explaning the variation in fungal community compistion between our treatment.
+
+
+# Citation and Contact
+
+If this pipeline contributes to your research, please consider citing this repository in your publications or presentations.
+For questions, bug reports, or collaboration inquiries, feel free to reach out:
+
+**Bibek Dabargainya**  
+Graduate Researcher, Auburn University  
+bzd0052@auburn.edu
