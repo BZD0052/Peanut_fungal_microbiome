@@ -97,10 +97,10 @@ PERMANOVA, and DESeq2-based differential abundance testing. This R analysis begi
 creating a phyloseq object. Before beginning, ensure that you have the following files
 downloaded and in an appropriate directory so that R can utilize them:
 
-      - [OTU_TABLE_CSV_FUNGI.csv](Phyloseq_input/OTU_TABLE_CSV_FUNGI.csv)
-      - [In_use_constax_taxonomy.csv](Phyloseq_input/In_use_constax_taxonomy.csv)
-      - [FungalMetadata_2024.csv](Phyloseq_input/FungalMetadata_2024.csv)
-      - [otus.fasta](Phyloseq_input/otus.fasta)
+  - [OTU_TABLE_CSV_FUNGI.csv](Phyloseq_input/OTU_TABLE_CSV_FUNGI.csv)
+  - [In_use_constax_taxonomy.csv](Phyloseq_input/In_use_constax_taxonomy.csv)
+  - [FungalMetadata_2024.csv](Phyloseq_input/FungalMetadata_2024.csv)
+  - [otus.fasta](Phyloseq_input/otus.fasta)
 
 
   ## Load Dependencies
