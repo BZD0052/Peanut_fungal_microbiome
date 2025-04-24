@@ -78,4 +78,102 @@ Bellow is the summary for this pipeline:
    by Dr. Zachary Noel, but is included here with permission. It is based on internal, unpublished
    code developed by Dr. Noel for CONSTAX2 integration on ASAX. This functionality may be included
    in future public releases of the original pipeline.
+  
+# R Analysis: Peanut Fungi
+
+This R pipeline processes fungal ITS1 amplicon sequencing data from peanut samples
+collected under drought and irrigated conditions across three years. It includes
+steps for creating phyloseq objects, decontamination, diversity analysis, normalization,
+PERMANOVA, and DESeq2-based differential abundance testing.
+
+## Load Dependencies
+  Load required R libraries necessary for microbiome and statistical analysis. This pipeline includes :
+  
+  ### Core analysis packages
+   -phyloseq       (v1.48.0)   # Microbiome data import, transformation, and analysis
+   -DESeq2         (v1.44.0)   # Differential abundance testing using negative binomial models
+   -vegan          (v2.6-8)    # Community ecology analysis and PERMANOVA
+   -metagenomeSeq  (v1.46.0)   # CSS normalization and abundance modeling for sparse count data
+   -decontam       (v1.24.0)   # Statistical identification of contaminant
+
+  ### Sequence and DNA handling
+  -Biostrings     (v2.72.1)   # Efficient manipulation of biological sequences
+
+  ### Visualization
+  -ggplot2        (v3.5.2)    # Core plotting package for data visualization
+  -ggpubr         (v0.6.0)    # Publication-ready visualizations built on ggplot2
+  -ggrepel        (v0.9.6)    # Smart label placement in plots
+
+  ### Microbiome utilities
+  -microbiome     (v1.26.0)   # High-level tools for microbiome data exploration
+
+  ### Data handling
+  -tidyverse      (v2.0.0)    # Collection of packages for tidy data science
+  -dplyr          (v1.1.4)    # Data manipulation grammar (part of tidyverse)
+
+  
+
+## Create Phyloseq Object
+   Load OTU table, taxonomy file, metadata, and fasta sequences from the pipeline output.
+   Integrate all data into a single phyloseq object. Sample names are harmonized across
+   OTU and metadata to ensure consistency.
+
+## Decontamination
+   Use 'decontam' to identify and remove potential contaminants based on prevalence in
+   negative controls. Contaminants are visualized and removed before further analysis.
+
+## Filtering and Cleaning
+   In this step, only the samples labeled as 'True Sample' were retained, which excludes
+   controls and blank samples to focus on the actual biological data. We specifically filtered
+   for taxa classified under the Kingdom 'Fungi' to narrow the analysis to relevant fungal taxa.
+   Any taxa with zero counts across all samples were removed to ensure that only those with 
+   measurable presence were considered in subsequent analyses. Additionally, samples with fewer
+   than 5,000 total reads were excluded, as they were deemed too low in depth for reliable analysis.
+   These filtering steps ensure that the data used in the analysis is both relevant and of
+   adequate quality.
+
+## Summary Statistics
+   After filtering the dataset, we calculated key statistics to assess sequencing depth across
+   all retained samples. This included the total number of reads remaining, along with the mean
+   and median read depths per sample. To visualize the distribution of sequencing effort,
+   a histogram was generated showing the number of reads per sample, with a dashed vertical line
+   indicating the median read depth. This step provides a quick overview of data quality before
+   diversity and abundance analyses
+
+## Rarefaction
+   Rarefaction curves were generated to evaluate sequencing depth sufficiency and OTU richness
+   across samples. Median read depth was overlaid to visualize typical sampling effort, and
+   final plots were grouped by treatment and tissue to highlight differences in richness
+   accumulation under each condition.
+
+## Alpha Diversity
+   Diversity indices including Shannon, Inverse Simpson, Observed Richness, and Evenness were
+   calculated to assess within-sample fungal diversity. A 3-way ANOVA was performed separately
+   by year to evaluate the effects of treatment, tissue type, and plant variety. Results were 
+   visualized using faceted boxplots and saved for interpretation.
+
+## CSS Normalization (metagenomeSeq)
+   Read counts were normalized using cumulative sum scaling (CSS) via the metagenomeSeq package
+   to correct for library size differences across samples. The resulting normalized phyloseq 
+   object was saved for downstream beta diversity and differential abundance analyses.-
+   
+## Beta Diversity & PERMANOVA
+   Bray-Curtis distance matrices were used to visualize community dissimilarities through PCoA.
+   Global PERMANOVA tested the effects of Treatment, Tissue, and plant variety interactions, 
+   while tissue and year specific PERMANOVA, beta-dispersion, and ANOSIM analyses provided
+   fined tuned resolution. All outputs, including ordination plots and statistical results,
+   were saved by year and tissue.
+
+## Differential Abundance (DESeq2)
+   For each year (2022–2024), DESeq2 was applied to Peg tissue samples under Drought vs Irrigated
+   conditions. Significant OTUs were filtered, annotated with taxonomy and visualized using volcano
+   plots colored by fungal class. Final figures were saved for each year to highlight key shifts 
+   in community structure. 
+
+All plots are saved in the 'Plots/' directory. Statistical outputs are stored in
+'Tables/' with subfolders for ANOVA, PERMANOVA, ANOSIM, and DESeq2 comparisons.
+
+To repeat this pipeline, start with the final filtered phyloseq object:
+  'Phyloseq_input/Fungi-phyloseq-clean.rds'
+and follow each section of the R Markdown or script as modular steps.
 ")
