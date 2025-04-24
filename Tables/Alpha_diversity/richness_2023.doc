@@ -1,0 +1,14 @@
+Analysis of Variance Table
+
+Response: richness
+                            Df  Sum Sq Mean Sq  F value  Pr(>F)    
+Treatment                    1      13      13   0.0115 0.91489    
+Tissue                       2 1729507  864754 779.7581 < 2e-16 ***
+P.variety                    1     175     175   0.1580 0.69169    
+Treatment:Tissue             2    8808    4404   3.9710 0.02124 *  
+Treatment:P.variety          1      82      82   0.0736 0.78658    
+Tissue:P.variety             2    2211    1106   0.9969 0.37188    
+Treatment:Tissue:P.variety   2    1509     754   0.6802 0.50836    
+Residuals                  127  140843    1109                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

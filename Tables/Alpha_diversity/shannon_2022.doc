@@ -1,0 +1,14 @@
+Analysis of Variance Table
+
+Response: shannon
+                           Df  Sum Sq Mean Sq F value    Pr(>F)    
+Treatment                   1  2.1255  2.1255 11.1649  0.001193 ** 
+Tissue                      2 28.8033 14.4016 75.6485 < 2.2e-16 ***
+P.variety                   1  0.2075  0.2075  1.0901  0.299103    
+Treatment:Tissue            2  0.4691  0.2346  1.2321  0.296295    
+Treatment:P.variety         1  0.1666  0.1666  0.8753  0.351871    
+Tissue:P.variety            2  0.2747  0.1373  0.7214  0.488710    
+Treatment:Tissue:P.variety  2  0.0425  0.0213  0.1116  0.894500    
+Residuals                  95 18.0857  0.1904                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
