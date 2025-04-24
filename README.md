@@ -197,3 +197,92 @@ For questions, bug reports, or collaboration inquiries, feel free to reach out:
 **Bibek Dabargainya**  
 Graduate Researcher, Auburn University  
 bzd0052@auburn.edu
+
+# File Tree
+
+```
+├──📁 HPC_script
+│   ├──📄 Flourishing_fingi_pipeline.sh
+│   ├──📄 replace_fastaheaders2.py
+│   └──📄 samples.txt
+├──📄 Peanut_fungal_microbiome.Rproj
+├──🌐 Peanut_Fungi_Final.html
+├──📝 Peanut_Fungi_Final.md
+├──📘 Peanut_Fungi_Final.Rmd
+├──📁 Phyloseq_input
+│   ├──📊 FungalMetadata_2024.csv
+│   ├──💾 Fungi-phyloseq-clean-CSS.rds
+│   ├──💾 Fungi-phyloseq-clean.rds
+│   ├──💾 Fungi-phyloseq.rds
+│   ├──📊 In_use_constax_taxonomy.csv
+│   ├──🧬 otus.fasta
+│   └──📊 OTU_TABLE_CSV_FUNGI.csv
+├──📁 Plots
+│   ├──📁 Alpha_diversity
+│   │   ├── 	🖼️ Eveness_final.png
+│   │   ├── Final_combined_alpha_diversity_plot1.png
+│   │   ├── Invsimpson_final.png
+│   │   ├── Richness_final.png
+│   │   └── shannon_final.png
+│   ├──📁 Beta_diversity_PCoA
+│   │   ├── PCoA_Peg_AllYears.png
+│   │   ├── PCoA_Root_AllYears.png
+│   │   └── PCoA_Soil_AllYears.png
+│   ├── Decontaminated_plot.png
+│   ├──📁 Differential_abundance
+│   │   ├── Diff_abundance_2022_peg2.png
+│   │   ├── Diff_abundance_2023_peg.png
+│   │   └──️ Diff_abundance_2024_peg.png
+│   ├── fungi.rareplot.png
+│   └── read.depths.plot.png
+├──📝 README.md
+└──📁 Tables
+    ├──📁 Alpha_diversity
+    │   ├──📄 even_2022.doc
+    │   ├──📄 even_2023.doc
+    │   ├──📄 even_2024.doc
+    │   ├──📄 invsimpson_2022.doc
+    │   ├──📄 invsimpson_2023.doc
+    │   ├──📄 invsimpson_2024.doc
+    │   ├──📄 richness_2022.doc
+    │   ├──📄 richness_2023.doc
+    │   ├──📄 richness_2024.doc
+    │   ├──📄 shannon_2022.doc
+    │   ├──📄 shannon_2023.doc
+    │   └──📄 shannon_2024.doc
+    ├──📁 Anosim
+    │   ├──📄 ANOSIM_2022_Peg.doc
+    │   ├──📄 ANOSIM_2022_Root.doc
+    │   ├──📄 ANOSIM_2022_Soil.doc
+    │   ├──📄 ANOSIM_2023_Peg.doc
+    │   ├──📄 ANOSIM_2023_Root.doc
+    │   ├──📄 ANOSIM_2023_Soil.doc
+    │   ├──📄 ANOSIM_2024_Peg.doc
+    │   ├──📄 ANOSIM_2024_Root.doc
+    │   └──📄 ANOSIM_2024_Soil.doc
+    ├──📁 Beta_dispersion
+    │   ├──📄 BetaDispersion_2022_Peg.doc
+    │   ├──📄 BetaDispersion_2022_Root.doc
+    │   ├──📄 BetaDispersion_2022_Soil.doc
+    │   ├──📄 BetaDispersion_2023_Peg.doc
+    │   ├──📄 BetaDispersion_2023_Root.doc
+    │   ├──📄 BetaDispersion_2023_Soil.doc
+    │   ├──📄 BetaDispersion_2024_Peg.doc
+    │   ├──📄 BetaDispersion_2024_Root.doc
+    │   └──📄 BetaDispersion_2024_Soil.doc
+    ├──📁 Global_permanova
+    │   ├──📄 Permanova_2022.doc
+    │   ├──📄 Permanova_2023.doc
+    │   └──📄 Permanova_2024.doc
+    └──📁 Permanova
+        ├──📄 Permanova_2022_Peg.doc
+        ├──📄 Permanova_2022_Root.doc
+        ├──📄 Permanova_2022_Soil.doc
+        ├──📄 Permanova_2023_Peg.doc
+        ├──📄 Permanova_2023_Root.doc
+        ├──📄 Permanova_2023_Soil.doc
+        ├──📄 Permanova_2024_Peg.doc
+        ├──📄 Permanova_2024_Root.doc
+        └──📄 Permanova_2024_Soil.doc
+        
+```
